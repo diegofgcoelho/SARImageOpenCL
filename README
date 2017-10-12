@@ -1,0 +1,3 @@
+This project implements a new algorithm for complex matrix (Hermitian) inversion and determinant computation in the context of Synthetic Aperture Radar (SAR). The implementation uses GPGPU with Open Computing Language (OpenCL) and C/C++ on the host side (CPU).
+
+The new algorithm uses the symmetries of Hermitian matrices in order to reduce the overall arithmetic complexity. The proposed algorithm is compared with the usually employed technique that relies on Cholesky factorization.
