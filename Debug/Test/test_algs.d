@@ -25,22 +25,28 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /usr/include/xlocale.h \
     /usr/include/c++/5/exception \
     /usr/include/c++/5/bits/atomic_lockfree_defines.h \
+    /usr/include/c++/5/bits/exception_ptr.h \
+    /usr/include/c++/5/bits/exception_defines.h \
+    /usr/include/c++/5/bits/nested_exception.h \
     /usr/include/c++/5/bits/char_traits.h \
     /usr/include/c++/5/bits/stl_algobase.h \
     /usr/include/c++/5/bits/functexcept.h \
-    /usr/include/c++/5/bits/exception_defines.h \
     /usr/include/c++/5/bits/cpp_type_traits.h \
     /usr/include/c++/5/ext/type_traits.h \
     /usr/include/c++/5/ext/numeric_traits.h \
     /usr/include/c++/5/bits/stl_pair.h \
     /usr/include/c++/5/bits/move.h \
     /usr/include/c++/5/bits/concept_check.h \
+    /usr/include/c++/5/type_traits \
     /usr/include/c++/5/bits/stl_iterator_base_types.h \
     /usr/include/c++/5/bits/stl_iterator_base_funcs.h \
     /usr/include/c++/5/debug/debug.h \
     /usr/include/c++/5/bits/stl_iterator.h \
     /usr/include/c++/5/bits/ptr_traits.h \
     /usr/include/c++/5/bits/predefined_ops.h \
+    /usr/include/c++/5/cstdint \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/stdint.h \
+    /usr/include/stdint.h \
     /usr/include/c++/5/bits/localefwd.h \
     /usr/include/x86_64-linux-gnu/c++/5/bits/c++locale.h \
     /usr/include/c++/5/clocale \
@@ -78,10 +84,40 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /usr/include/c++/5/bits/stl_function.h \
     /usr/include/c++/5/backward/binders.h \
     /usr/include/c++/5/bits/range_access.h \
+    /usr/include/c++/5/initializer_list \
     /usr/include/c++/5/bits/basic_string.h \
     /usr/include/c++/5/ext/alloc_traits.h \
+    /usr/include/c++/5/bits/alloc_traits.h \
+    /usr/include/c++/5/ext/string_conversions.h \
+    /usr/include/c++/5/cstdlib \
+    /usr/include/stdlib.h \
+    /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+    /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
+    /usr/include/x86_64-linux-gnu/sys/types.h \
+    /usr/include/x86_64-linux-gnu/sys/select.h \
+    /usr/include/x86_64-linux-gnu/bits/select.h \
+    /usr/include/x86_64-linux-gnu/bits/sigset.h \
+    /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
+    /usr/include/alloca.h \
+    /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+    /usr/include/c++/5/cstdio \
+    /usr/include/libio.h \
+    /usr/include/_G_config.h \
+    /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+    /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
+    /usr/include/c++/5/cerrno \
+    /usr/include/errno.h \
+    /usr/include/x86_64-linux-gnu/bits/errno.h \
+    /usr/include/linux/errno.h \
+    /usr/include/x86_64-linux-gnu/asm/errno.h \
+    /usr/include/asm-generic/errno.h \
+    /usr/include/asm-generic/errno-base.h \
+    /usr/include/c++/5/bits/functional_hash.h \
+    /usr/include/c++/5/bits/hash_bytes.h \
     /usr/include/c++/5/bits/basic_string.tcc \
     /usr/include/c++/5/bits/locale_classes.tcc \
+    /usr/include/c++/5/system_error \
+    /usr/include/x86_64-linux-gnu/c++/5/bits/error_constants.h \
     /usr/include/c++/5/stdexcept \
     /usr/include/c++/5/streambuf \
     /usr/include/c++/5/bits/streambuf.tcc \
@@ -99,23 +135,11 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /usr/include/c++/5/bits/istream.tcc \
     /usr/include/c++/5/fstream \
     /usr/include/c++/5/bits/codecvt.h \
-    /usr/include/c++/5/cstdio \
-    /usr/include/libio.h \
-    /usr/include/_G_config.h \
-    /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-    /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
     /usr/include/x86_64-linux-gnu/c++/5/bits/basic_file.h \
     /usr/include/x86_64-linux-gnu/c++/5/bits/c++io.h \
     /usr/include/c++/5/bits/fstream.tcc \
     /usr/include/c++/5/sstream \
     /usr/include/c++/5/bits/sstream.tcc \
-    /usr/include/c++/5/cerrno \
-    /usr/include/errno.h \
-    /usr/include/x86_64-linux-gnu/bits/errno.h \
-    /usr/include/linux/errno.h \
-    /usr/include/x86_64-linux-gnu/asm/errno.h \
-    /usr/include/asm-generic/errno.h \
-    /usr/include/asm-generic/errno-base.h \
     /usr/include/c++/5/complex \
     /usr/include/c++/5/cmath \
     /usr/include/math.h \
@@ -130,21 +154,9 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
     /usr/local/cuda-8.0/bin/../targets/x86_64-linux/include/CL/cl.h \
     /usr/local/cuda-8.0/bin/../targets/x86_64-linux/include/CL/cl_platform.h \
-    /usr/lib/gcc/x86_64-linux-gnu/5/include/stdint.h \
-    /usr/include/stdint.h \
     /usr/lib/gcc/x86_64-linux-gnu/5/include/xmmintrin.h \
     /usr/lib/gcc/x86_64-linux-gnu/5/include/mmintrin.h \
     /usr/lib/gcc/x86_64-linux-gnu/5/include/mm_malloc.h \
-    /usr/include/stdlib.h \
-    /usr/include/x86_64-linux-gnu/bits/waitflags.h \
-    /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
-    /usr/include/x86_64-linux-gnu/sys/types.h \
-    /usr/include/x86_64-linux-gnu/sys/select.h \
-    /usr/include/x86_64-linux-gnu/bits/select.h \
-    /usr/include/x86_64-linux-gnu/bits/sigset.h \
-    /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
-    /usr/include/alloca.h \
-    /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
     /usr/lib/gcc/x86_64-linux-gnu/5/include/emmintrin.h \
     ../Test/../Sources/numerical_s.h \
     ../Test/../Sources/../OpenCL/numerical_t.h \
@@ -154,10 +166,15 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /home/diego/softwares/eigen3.3/Eigen/src/Core/util/Macros.h \
     /home/diego/softwares/eigen3.3/Eigen/src/Core/util/MKL_support.h \
     /usr/include/c++/5/cstddef \
-    /usr/include/c++/5/cstdlib \
     /usr/include/c++/5/cassert \
     /usr/include/assert.h \
     /usr/include/c++/5/functional \
+    /usr/include/c++/5/typeinfo \
+    /usr/include/c++/5/tuple \
+    /usr/include/c++/5/utility \
+    /usr/include/c++/5/bits/stl_relops.h \
+    /usr/include/c++/5/array \
+    /usr/include/c++/5/bits/uses_allocator.h \
     /usr/include/c++/5/cstring \
     /usr/include/string.h \
     /usr/include/c++/5/limits \
@@ -171,13 +188,72 @@ Test/test_algs.o : ../Test/test_algs.cpp \
     /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
     /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
     /usr/include/c++/5/algorithm \
-    /usr/include/c++/5/utility \
-    /usr/include/c++/5/bits/stl_relops.h \
     /usr/include/c++/5/bits/stl_algo.h \
     /usr/include/c++/5/bits/algorithmfwd.h \
     /usr/include/c++/5/bits/stl_heap.h \
     /usr/include/c++/5/bits/stl_tempbuf.h \
     /usr/include/c++/5/bits/stl_construct.h \
+    /usr/include/c++/5/random \
+    /usr/include/c++/5/bits/random.h \
+    /usr/include/c++/5/vector \
+    /usr/include/c++/5/bits/stl_uninitialized.h \
+    /usr/include/c++/5/bits/stl_vector.h \
+    /usr/include/c++/5/bits/stl_bvector.h \
+    /usr/include/c++/5/bits/vector.tcc \
+    /usr/include/c++/5/bits/uniform_int_dist.h \
+    /usr/include/x86_64-linux-gnu/c++/5/bits/opt_random.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/x86intrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/ia32intrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/pmmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/tmmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/ammintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/smmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/popcntintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/wmmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/immintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avxintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx2intrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512fintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512erintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512pfintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512cdintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512vlintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512bwintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512dqintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512vlbwintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512vldqintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512ifmaintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512ifmavlintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512vbmiintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/avx512vbmivlintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/shaintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/lzcntintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/bmiintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/bmi2intrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/fmaintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/f16cintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/rtmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xtestintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/mm3dnow.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/prfchwintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/fma4intrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xopintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/lwpintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/tbmintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/rdseedintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/fxsrintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xsaveintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xsaveoptintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/adxintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/clwbintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/pcommitintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/clflushoptintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xsavesintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/xsavecintrin.h \
+    /usr/lib/gcc/x86_64-linux-gnu/5/include/mwaitxintrin.h \
+    /usr/include/c++/5/bits/random.tcc \
+    /usr/include/c++/5/numeric \
+    /usr/include/c++/5/bits/stl_numeric.h \
     /home/diego/softwares/eigen3.3/Eigen/src/Core/util/Constants.h \
     /home/diego/softwares/eigen3.3/Eigen/src/Core/util/Meta.h \
     /home/diego/softwares/eigen3.3/Eigen/src/Core/util/ForwardDeclarations.h \

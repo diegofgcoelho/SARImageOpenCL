@@ -26,4 +26,8 @@ void setmcm(mcomplex* to, mcomplex* from);
 
 void setmcr(mcomplex* to, mreal* from);
 
+double norm(mcmatrix a);
+
+double dnorm(mcmatrix a, mcmatrix b);
+
 #endif /* NUMERICAL_S_H_ */

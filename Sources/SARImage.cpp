@@ -1,23 +1,50 @@
+/*
+ * numerical_t.h
+ *
+ *  Created on: Sep 28, 2017
+ *      Author: Diego Coelho, PhD Candidate, University of Calgary
+ */
+
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <cerrno>
+#include <ctime>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
 #include <CL/cl.h>
 
+#include "support.h"
 #include "../OpenCL/numerical_t.h"
 #include "numerical_s.h"
-
 #include "../Test/test_algs.h"
+#include "../../home/diego/softwares/eigen3.3/Eigen/Dense"
 
-const unsigned int nMatrices = 15;
+const unsigned int nMatrices = 10000;
+const unsigned int replicates = 10000;
+
+/*
+ * The testing functions for the kernels were already verified. See the folder Test.
+ */
 
 int main(int argc, char* argv[]){
-	//test_inv_det_fast(); //Looks ok
-	test_inv_det_lu();
-}
 
-int main_(int argc, char* argv []){
+	std::stringstream nss, repss;
+	nss << nMatrices;
+	repss << replicates;
+	std::string ftimes_lu_name("tLUn");
+	ftimes_lu_name = ftimes_lu_name+nss.str()+"rep"+repss.str()+".txt";
+	std::string ftimes_fast_name("tfastn");
+	ftimes_fast_name = ftimes_fast_name+nss.str()+"rep"+repss.str()+".txt";
+	std::ofstream ftimes_lu(ftimes_lu_name);
+	std::ofstream ftimes_fast(ftimes_fast_name);
+
+	srand((unsigned int) time(0));
 
 	cl_platform_id platform_id;//stores one platform only
 	cl_int erri;
@@ -33,6 +60,16 @@ int main_(int argc, char* argv []){
 	size_t clDATA_SIZE = static_cast<size_t>(nMatrices);
 	char buildOptions[] = "-I /home/diego/cuda-workspace/SARImageOpenCL/OpenCL";
 
+	timespec time_init, time_end;
+	double time_lu = 0.0, time_fast = 0.0;
+	std::vector<double> times_lu(replicates, 0.0), times_fast(replicates, 0.0);
+
+	std::string kernel_string_name_lu = "inv_det_lu";
+	std::string kernel_string_name_fast = "inv_det_fast";
+	std::vector<std::string> kernel_strings(2);
+	kernel_strings[0] = kernel_string_name_lu;
+	kernel_strings[1] = kernel_string_name_fast;
+
 
 	mcmatrix inputMatrices[nMatrices];
 	mcomplex mczero;
@@ -44,17 +81,30 @@ int main_(int argc, char* argv []){
 	setmcm(&mcmzero.d, &mczero);
 	setmcm(&mcmzero.e, &mczero);
 	setmcm(&mcmzero.f, &mczero);
-	mcmatrix outputMatrices[nMatrices] = {mcmzero};
-	mcomplex outputDets[nMatrices] = {mczero};
+
+	mcmatrix outputMatricesLU[nMatrices] = {mcmzero};
+	mcmatrix outputMatricesFast[nMatrices] = {mcmzero};
+	mcomplex outputDetsLU[nMatrices] = {mczero}, outputDetsFast[nMatrices] = {mczero};
 
 	//Setting up the input matrices with random entries.
 	for(unsigned int i = 0; i < nMatrices; i++){
-		mcomplex mctemp = mcrand();
+		//Defining test matrix
+		Eigen::MatrixXcd A = Eigen::MatrixXcd::Random(3,3);
+		//Forcing it to be conjugate symmetric
+		A = A*A.transpose().conjugate();
+
+		mcomplex mctemp;
+		mctemp.a = A(0,0).real();mctemp.b = A(0,0).imag();
 		setmcm(&inputMatrices[i].a, &mctemp);
+		mctemp.a = A(0,1).real();mctemp.b = A(0,1).imag();
 		setmcm(&inputMatrices[i].b, &mctemp);
+		mctemp.a = A(0,2).real();mctemp.b = A(0,2).imag();
 		setmcm(&inputMatrices[i].c, &mctemp);
+		mctemp.a = A(1,1).real();mctemp.b = A(1,1).imag();
 		setmcm(&inputMatrices[i].d, &mctemp);
+		mctemp.a = A(1,2).real();mctemp.b = A(1,2).imag();
 		setmcm(&inputMatrices[i].e, &mctemp);
+		mctemp.a = A(2,2).real();mctemp.b = A(2,2).imag();
 		setmcm(&inputMatrices[i].f, &mctemp);
 	}
 
@@ -266,42 +316,6 @@ int main_(int argc, char* argv []){
 	}
 
 	/*
-	 * Specify the kernel to be used (in case there are many).
-	 */
-
-	kernel = clCreateKernel(program, "inv_det_lu", &erri);
-
-	switch(erri){
-	case CL_INVALID_PROGRAM:
-		std::cout << "Error! Invalid program." << std::endl;
-		exit(1);
-	case CL_INVALID_PROGRAM_EXECUTABLE:
-		std::cout << "Error! Invalid program executable." << std::endl;
-		exit(1);
-	case CL_INVALID_KERNEL_NAME:
-		std::cout << "Error! Invalid kernel name." << std::endl;
-		exit(1);
-	case CL_INVALID_KERNEL_DEFINITION:
-		std::cout << "Error! Invalid kernel definition." << std::endl;
-		exit(1);
-	case CL_INVALID_VALUE:
-		std::cout << "Error! Invalid value." << std::endl;
-		exit(1);
-	case CL_OUT_OF_RESOURCES:
-		std::cout << "Error! Unable to allocate OpenCL resources." << std::endl;
-		exit(1);
-	case CL_OUT_OF_HOST_MEMORY:
-		std::cout << "Error! Unable to allocate host resources." << std::endl;
-		exit(1);
-	case CL_SUCCESS:
-		std::cout << "Input buffer allocated successfully." << std::endl;
-		break;
-	default:
-		std::cout << "Error! But we could not detect what is wrong with the input buffer creation." << std::endl;
-		exit(1);
-	}
-
-	/*
 	 * Create buffer for inputMatrices.
 	 */
 
@@ -404,165 +418,231 @@ int main_(int argc, char* argv []){
 
 	}
 
-	/*
-	 * Writing the input data into the buffer.
-	 */
 
-	erri = clEnqueueWriteBuffer(command_queue, inputMatricesBuffer, CL_TRUE, 0, sizeof(mcmatrix)*nMatrices, inputMatrices, 0, NULL, NULL);
-
-	if(erri != CL_SUCCESS){
-		std::cout << "Error! The writing of data to the buffer was not successful." << std::endl;
-		exit(1);
-	} else {
-		std::cout << "The writing of data to the buffer was successful." << std::endl;
-	}
-
-	//Setting kernel arguments
-	erri = clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputMatricesBuffer);
-	switch(erri){
-	case CL_INVALID_KERNEL:
-		std::cout << "Error! The kernel is invalid." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_INDEX:
-		std::cout << "Error! Invalid kernel argument." << std::endl;
-		exit(1);
-	case CL_INVALID_MEM_OBJECT:
-		std::cout << "Error! Invalid memory object." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_SIZE:
-		std::cout << "Error! Invalid argument size." << std::endl;
-		exit(1);
-	case CL_SUCCESS:
-		std::cout << "The first input argument was setup correctly." << std::endl;
-		break;
-	default:
-		std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
-		exit(1);
-	}
-
-	//Setting kernel arguments
-	erri = clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputMatricesBuffer);
-	switch(erri){
-	case CL_INVALID_KERNEL:
-		std::cout << "Error! The kernel is invalid." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_INDEX:
-		std::cout << "Error! Invalid kernel argument." << std::endl;
-		exit(1);
-	case CL_INVALID_MEM_OBJECT:
-		std::cout << "Error! Invalid memory object." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_SIZE:
-		std::cout << "Error! Invalid argument size." << std::endl;
-		exit(1);
-	case CL_SUCCESS:
-		std::cout << "The second input argument was setup correctly." << std::endl;
-		break;
-	default:
-		std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
-		exit(1);
-	}
-
-	//Setting kernel arguments
-	erri = clSetKernelArg(kernel, 2, sizeof(cl_mem), &outputDetsBuffer);
-	switch(erri){
-	case CL_INVALID_KERNEL:
-		std::cout << "Error! The kernel is invalid." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_INDEX:
-		std::cout << "Error! Invalid kernel argument." << std::endl;
-		exit(1);
-	case CL_INVALID_MEM_OBJECT:
-		std::cout << "Error! Invalid memory object." << std::endl;
-		exit(1);
-	case CL_INVALID_ARG_SIZE:
-		std::cout << "Error! Invalid argument size." << std::endl;
-		exit(1);
-	case CL_SUCCESS:
-		std::cout << "The second input argument was setup correctly." << std::endl;
-		break;
-	default:
-		std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
-		exit(1);
-	}
-
-	//Enqueue kernel
-	clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &clDATA_SIZE, NULL, 0, NULL, NULL);
-	if(erri != CL_SUCCESS){
-		std::cout << "Error! The kernel was not queued successfully." << std::endl;
-		exit(1);
-	} else {
-		std::cout << "The kernel was queued successfully." << std::endl;
-	}
-
-	erri = clFinish(command_queue);
-	if(erri != CL_SUCCESS){
-		std::cout << "Error! The clFinish function was not successful." << std::endl;
-		exit(1);
-	} else {
-		std::cout << "The clFinish function was successful." << std::endl;
-	}
 
 	/*
-	 * Reading the output buffer.
+	 * we have only two kernels, that is why we run over the for loop only for 2 values of i.
 	 */
 
-	erri = clEnqueueReadBuffer(command_queue, outputMatricesBuffer, CL_TRUE, 0, sizeof(mcmatrix)*nMatrices, outputMatrices, 0, NULL, NULL);
+	for(unsigned int j = 0; j < replicates; j++){
 
-	if(erri != CL_SUCCESS){
-		std::cout << "Error! The reading of data from the buffer was not successful." << std::endl;
-		exit(1);
-	} else {
-		std::cout << "The reading of data from the buffer was successful." << std::endl;
+		for(unsigned int i = 0; i < 2; i++){
+
+			/*
+			 * Specify the kernel to be used. We will start by using the kernel based on Cholesky factorization.
+			 */
+
+			kernel = clCreateKernel(program, kernel_strings[i].c_str(), &erri);
+
+			switch(erri){
+			case CL_INVALID_PROGRAM:
+				std::cout << "Error! Invalid program." << std::endl;
+				exit(1);
+			case CL_INVALID_PROGRAM_EXECUTABLE:
+				std::cout << "Error! Invalid program executable." << std::endl;
+				exit(1);
+			case CL_INVALID_KERNEL_NAME:
+				std::cout << "Error! Invalid kernel name." << std::endl;
+				exit(1);
+			case CL_INVALID_KERNEL_DEFINITION:
+				std::cout << "Error! Invalid kernel definition." << std::endl;
+				exit(1);
+			case CL_INVALID_VALUE:
+				std::cout << "Error! Invalid value." << std::endl;
+				exit(1);
+			case CL_OUT_OF_RESOURCES:
+				std::cout << "Error! Unable to allocate OpenCL resources." << std::endl;
+				exit(1);
+			case CL_OUT_OF_HOST_MEMORY:
+				std::cout << "Error! Unable to allocate host resources." << std::endl;
+				exit(1);
+			case CL_SUCCESS:
+				std::cout << "Input buffer allocated successfully." << std::endl;
+				break;
+			default:
+				std::cout << "Error! But we could not detect what is wrong with the input buffer creation." << std::endl;
+				exit(1);
+			}
+
+
+			/*
+			 * Writing the input data into the buffer.
+			 */
+
+			erri = clEnqueueWriteBuffer(command_queue, inputMatricesBuffer, CL_TRUE, 0, sizeof(mcmatrix)*nMatrices, inputMatrices, 0, NULL, NULL);
+
+			if(erri != CL_SUCCESS){
+				std::cout << "Error! The writing of data to the buffer was not successful." << std::endl;
+				exit(1);
+			} else {
+				std::cout << "The writing of data to the buffer was successful." << std::endl;
+			}
+
+			//Setting kernel arguments
+			erri = clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputMatricesBuffer);
+			switch(erri){
+			case CL_INVALID_KERNEL:
+				std::cout << "Error! The kernel is invalid." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_INDEX:
+				std::cout << "Error! Invalid kernel argument." << std::endl;
+				exit(1);
+			case CL_INVALID_MEM_OBJECT:
+				std::cout << "Error! Invalid memory object." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_SIZE:
+				std::cout << "Error! Invalid argument size." << std::endl;
+				exit(1);
+			case CL_SUCCESS:
+				std::cout << "The first input argument was setup correctly." << std::endl;
+				break;
+			default:
+				std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
+				exit(1);
+			}
+
+			//Setting kernel arguments
+			erri = clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputMatricesBuffer);
+			switch(erri){
+			case CL_INVALID_KERNEL:
+				std::cout << "Error! The kernel is invalid." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_INDEX:
+				std::cout << "Error! Invalid kernel argument." << std::endl;
+				exit(1);
+			case CL_INVALID_MEM_OBJECT:
+				std::cout << "Error! Invalid memory object." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_SIZE:
+				std::cout << "Error! Invalid argument size." << std::endl;
+				exit(1);
+			case CL_SUCCESS:
+				std::cout << "The second input argument was setup correctly." << std::endl;
+				break;
+			default:
+				std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
+				exit(1);
+			}
+
+			//Setting kernel arguments
+			erri = clSetKernelArg(kernel, 2, sizeof(cl_mem), &outputDetsBuffer);
+			switch(erri){
+			case CL_INVALID_KERNEL:
+				std::cout << "Error! The kernel is invalid." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_INDEX:
+				std::cout << "Error! Invalid kernel argument." << std::endl;
+				exit(1);
+			case CL_INVALID_MEM_OBJECT:
+				std::cout << "Error! Invalid memory object." << std::endl;
+				exit(1);
+			case CL_INVALID_ARG_SIZE:
+				std::cout << "Error! Invalid argument size." << std::endl;
+				exit(1);
+			case CL_SUCCESS:
+				std::cout << "The second input argument was setup correctly." << std::endl;
+				break;
+			default:
+				std::cout << "Error! But we could not detect what is wrong with setting the kernel arguments." << std::endl;
+				exit(1);
+			}
+
+			//Starting counting time
+			clock_gettime(CLOCK_MONOTONIC, &time_init);
+
+			//Enqueue kernel
+			clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &clDATA_SIZE, NULL, 0, NULL, NULL);
+			if(erri != CL_SUCCESS){
+				std::cout << "Error! The kernel was not queued successfully." << std::endl;
+				exit(1);
+			}
+//			else {
+//				std::cout << "The kernel was queued successfully." << std::endl;
+//			}
+
+			erri = clFinish(command_queue);
+			if(erri != CL_SUCCESS){
+				std::cout << "Error! The clFinish function was not successful." << std::endl;
+				exit(1);
+			}
+//			else {
+//				std::cout << "The clFinish function was successful." << std::endl;
+//			}
+
+			//End counting time
+			clock_gettime(CLOCK_MONOTONIC, &time_end);
+			if(i == 0){
+				times_lu[j] = get_millisecs(diff_time(time_init, time_end));
+				ftimes_lu << times_lu[j] << ";..." << std::endl;
+			} else {
+				times_fast[j] = get_millisecs(diff_time(time_init, time_end));
+				ftimes_fast << times_fast[j] << ";..." << std::endl;
+			}
+			/*
+			 * Reading the output buffer.
+			 */
+
+			if( i == 0){
+				erri = clEnqueueReadBuffer(command_queue, outputMatricesBuffer, CL_TRUE, 0, sizeof(mcmatrix)*nMatrices, outputMatricesLU, 0, NULL, NULL);
+			} else {
+				erri = clEnqueueReadBuffer(command_queue, outputMatricesBuffer, CL_TRUE, 0, sizeof(mcmatrix)*nMatrices, outputMatricesFast, 0, NULL, NULL);
+			}
+
+
+			if(erri != CL_SUCCESS){
+				std::cout << "Error! The reading of data from the buffer was not successful." << std::endl;
+				exit(1);
+			} else {
+				std::cout << "The reading of data from the buffer was successful." << std::endl;
+			}
+
+			/*
+			 * Reading the output buffer.
+			 */
+
+			erri = clEnqueueReadBuffer(command_queue, outputDetsBuffer, CL_TRUE, 0, sizeof(mcomplex)*nMatrices, outputDetsLU, 0, NULL, NULL);
+
+			if(erri != CL_SUCCESS){
+				std::cout << "Error! The reading of data from the buffer was not successful." << std::endl;
+				exit(1);
+			} else {
+				std::cout << "The reading of data from the buffer was successful." << std::endl;
+			}
+		}
+
+		for(unsigned int k = 0; k< nMatrices; k++) {
+			double tdnorm = dnorm(outputMatricesFast[k], outputMatricesLU[k]);
+			double thresholdv = 1e-6;
+			if(tdnorm >= thresholdv){
+				std::cout << "The matrices in k = " << k << " in replicate j = " << j <<
+						" show a norm of " << tdnorm << ", higher than the threshold of " << thresholdv << std::endl;
+			}
+		}
 	}
 
-	/*
-	 * Reading the output buffer.
-	 */
+	std::cout << "**********Statistics for the Cholesky factorization*********" << std::endl;
+	double tmean = 0.0;
+	for(unsigned int i = 0; i < replicates; i++) tmean += times_lu[i];
+	tmean /= replicates;
+	std::cout << "Mean time: " << tmean << std::endl;
+	std::cout << "Max time: " << *std::max_element(times_lu.begin(), times_lu.end()) << std::endl;
+	std::cout << "Min time: " << *std::min_element(times_lu.begin(), times_lu.end()) << std::endl;
 
-	erri = clEnqueueReadBuffer(command_queue, outputDetsBuffer, CL_TRUE, 0, sizeof(mcomplex)*nMatrices, outputDets, 0, NULL, NULL);
+	std::cout << "**********Statistics for the proposed  fast algorithm*********" << std::endl;
+	tmean = 0.0;
+	for(unsigned int i = 0; i < replicates; i++) tmean += times_fast[i];
+	tmean /= replicates;
+	std::cout << "Mean time: " << tmean << std::endl;
+	std::cout << "Max time: " << *std::max_element(times_fast.begin(), times_fast.end()) << std::endl;
+	std::cout << "Min time: " << *std::min_element(times_fast.begin(), times_fast.end()) << std::endl;
+	tmean = 0.0;
+	for(unsigned int i = 0; i < replicates; i++)  tmean += times_lu[i]/times_fast[i];
+	tmean /= replicates;
+	std::cout << "\n\nMean speedup: " << tmean << std::endl;
 
-	if(erri != CL_SUCCESS){
-		std::cout << "Error! The reading of data from the buffer was not successful." << std::endl;
-		exit(1);
-	} else {
-		std::cout << "The reading of data from the buffer was successful." << std::endl;
-	}
-
-	//Printing the results
-	for(unsigned int i = 0; i< nMatrices; i++) {
-		std::cout << "inputMatrix[i] = [";
-		printmc(inputMatrices[i].a);
-		std::cout<< " ";
-		printmc(inputMatrices[i].b);
-		std::cout << " ";
-		printmc(inputMatrices[i].c);
-		printmc(inputMatrices[i].d);
-		std::cout << " ";
-		printmc(inputMatrices[i].e);
-		std::cout << " ";
-		printmc(inputMatrices[i].f);
-		std::cout << "]"<< std::endl;
-	}
-
-	for(unsigned int i = 0; i< nMatrices; i++) {
-		std::cout << "outputMatrix[i] = [";
-		printmc(outputMatrices[i].a);
-		std::cout << " ";
-		printmc(outputMatrices[i].b);
-		std::cout << " ";
-		printmc(outputMatrices[i].c);
-		printmc(outputMatrices[i].d);
-		std::cout << " ";
-		printmc(outputMatrices[i].e);
-		std::cout << " ";
-		printmc(outputMatrices[i].f);
-		std::cout << "]";
-		std::cout << " and det = ";
-		printmc(outputDets[i]);
-		std::cout << std::endl;
-	}
-
+	//Closing files
+	ftimes_lu.close();
+	ftimes_fast.close();
 
 	//Cleaning up
 	clReleaseMemObject(inputMatricesBuffer);
