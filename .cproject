@@ -27,7 +27,13 @@
 								<option id="nvcc.compiler.option.level.526782547" name="Generate host debug information (-g)" superClass="nvcc.compiler.option.level" value="true" valueType="boolean"/>
 								<option defaultValue="nvcc.compiler.optimization.level.none" id="nvcc.compiler.optimization.level.1373177125" name="Optimization Level" superClass="nvcc.compiler.optimization.level" valueType="enumerated"/>
 								<option id="nvcc.compiler.pic.939291487" name="Position Independent Code (-fPIC)" superClass="nvcc.compiler.pic"/>
-								<option id="nvcc.compiler.cpp11option.2028493457" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
+								<option id="nvcc.compiler.cpp11option.2028493457" name="Enable C++11 support (-std=c++11)" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
+								<option id="nvcc.compiler.include.paths.1405485916" name="Include paths (-I)" superClass="nvcc.compiler.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/share/R/include"/>
+									<listOptionValue builtIn="false" value="/home/diego/R/x86_64-pc-linux-gnu-library/3.2"/>
+									<listOptionValue builtIn="false" value="/home/diego/R/x86_64-pc-linux-gnu-library/3.2/Rcpp/include"/>
+									<listOptionValue builtIn="false" value="/home/diego/R/x86_64-pc-linux-gnu-library/3.2/RInside/include"/>
+								</option>
 								<inputType id="nvcc.compiler.input.cu.1795074336" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.82775310" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.1785390257" superClass="nvcc.compiler.input.c"/>
@@ -35,6 +41,11 @@
 							<tool id="nvcc.linker.base.1463588705" name="NVCC Linker" superClass="nvcc.linker.base">
 								<option id="nvcc.linker.option.libs.1092204771" name="Libraries (-l)" superClass="nvcc.linker.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="OpenCL"/>
+									<listOptionValue builtIn="false" value="RInside"/>
+									<listOptionValue builtIn="false" value="R"/>
+								</option>
+								<option id="nvcc.linker.option.paths.1402572315" name="Library search path (-L)" superClass="nvcc.linker.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/home/diego/R/x86_64-pc-linux-gnu-library/3.2/RInside/lib"/>
 								</option>
 								<inputType id="nvcc.linker.input.1554484558" superClass="nvcc.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -129,5 +140,12 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/SARImageOpenCL"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/SARImageOpenCL"/>
+		</configuration>
+	</storageModule>
 </cproject>

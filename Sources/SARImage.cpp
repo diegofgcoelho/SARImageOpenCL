@@ -25,8 +25,11 @@
 #include "../Test/test_algs.h"
 #include "../../home/diego/softwares/eigen3.3/Eigen/Dense"
 
-const unsigned int nMatrices = 10000;
-const unsigned int replicates = 10000;
+//This determines the number of replicates
+const long unsigned int replicates = 1000;
+
+//This determines if we will use real data or synthetic data
+const bool SYNTHETIC = true;
 
 /*
  * The testing functions for the kernels were already verified. See the folder Test.
@@ -34,6 +37,59 @@ const unsigned int replicates = 10000;
 
 int main(int argc, char* argv[]){
 
+
+	//Array of input matrices, synthetic or to be read from R file
+	mcmatrix* inputMatrices = NULL;
+	//The variable that will store the length of the inputMatrices array
+	long unsigned int nMatrices = 0;
+
+	if(!SYNTHETIC){
+		/*
+		 * Reading real data from R file
+		 */
+		std::string Rfilename = "/home/diego/isync/dfgc1/Coelho-Cintra-Frery-Dimitrov/data/SanFranciscoImage.rdata";
+		read_r_data(Rfilename, &inputMatrices, &nMatrices);
+		std::cout << "File data converted to C++ format. We have a total of " << nMatrices << " matrices." << std::endl;
+
+	} else {
+		/*
+		 * Creating synthetic data to be used for simulation and setting the number of matrices
+		 */
+
+		nMatrices = 450*600;
+
+		//Allocating space for the inputMatrices array
+		inputMatrices = new mcmatrix[nMatrices];
+
+		//Setting up the input matrices with random entries.
+		for(unsigned int i = 0; i < nMatrices; i++){
+			//Defining test matrix
+			Eigen::MatrixXcd A = Eigen::MatrixXcd::Random(3,3);
+			//Forcing it to be Hermitian
+			A = A*A.transpose().conjugate();
+
+			mcomplex mctemp;
+			mctemp.a = A(0,0).real();mctemp.b = A(0,0).imag();
+			setmcm(&inputMatrices[i].a, &mctemp);
+			mctemp.a = A(0,1).real();mctemp.b = A(0,1).imag();
+			setmcm(&inputMatrices[i].b, &mctemp);
+			mctemp.a = A(0,2).real();mctemp.b = A(0,2).imag();
+			setmcm(&inputMatrices[i].c, &mctemp);
+			mctemp.a = A(1,1).real();mctemp.b = A(1,1).imag();
+			setmcm(&inputMatrices[i].d, &mctemp);
+			mctemp.a = A(1,2).real();mctemp.b = A(1,2).imag();
+			setmcm(&inputMatrices[i].e, &mctemp);
+			mctemp.a = A(2,2).real();mctemp.b = A(2,2).imag();
+			setmcm(&inputMatrices[i].f, &mctemp);
+		}
+
+	}
+
+
+	/*
+	 * Specify the files to be created for storing the runtimes
+	 * for the Cholesky based approach and the proposed method.
+	 */
 	std::stringstream nss, repss;
 	nss << nMatrices;
 	repss << replicates;
@@ -70,43 +126,13 @@ int main(int argc, char* argv[]){
 	kernel_strings[0] = kernel_string_name_lu;
 	kernel_strings[1] = kernel_string_name_fast;
 
+	mcmatrix* outputMatricesFast = new mcmatrix[nMatrices];
+	mcmatrix* outputMatricesLU = new mcmatrix[nMatrices];
+	mcomplex* outputDetsLU = new mcomplex[nMatrices];
+	mcomplex* outputDetsFast = new mcomplex[nMatrices];
 
-	mcmatrix inputMatrices[nMatrices];
-	mcomplex mczero;
-	mczero.a = 0.0; mczero.b = 0.0;
-	mcmatrix mcmzero;
-	setmcm(&mcmzero.a, &mczero);
-	setmcm(&mcmzero.b, &mczero);
-	setmcm(&mcmzero.c, &mczero);
-	setmcm(&mcmzero.d, &mczero);
-	setmcm(&mcmzero.e, &mczero);
-	setmcm(&mcmzero.f, &mczero);
 
-	mcmatrix outputMatricesLU[nMatrices] = {mcmzero};
-	mcmatrix outputMatricesFast[nMatrices] = {mcmzero};
-	mcomplex outputDetsLU[nMatrices] = {mczero}, outputDetsFast[nMatrices] = {mczero};
 
-	//Setting up the input matrices with random entries.
-	for(unsigned int i = 0; i < nMatrices; i++){
-		//Defining test matrix
-		Eigen::MatrixXcd A = Eigen::MatrixXcd::Random(3,3);
-		//Forcing it to be conjugate symmetric
-		A = A*A.transpose().conjugate();
-
-		mcomplex mctemp;
-		mctemp.a = A(0,0).real();mctemp.b = A(0,0).imag();
-		setmcm(&inputMatrices[i].a, &mctemp);
-		mctemp.a = A(0,1).real();mctemp.b = A(0,1).imag();
-		setmcm(&inputMatrices[i].b, &mctemp);
-		mctemp.a = A(0,2).real();mctemp.b = A(0,2).imag();
-		setmcm(&inputMatrices[i].c, &mctemp);
-		mctemp.a = A(1,1).real();mctemp.b = A(1,1).imag();
-		setmcm(&inputMatrices[i].d, &mctemp);
-		mctemp.a = A(1,2).real();mctemp.b = A(1,2).imag();
-		setmcm(&inputMatrices[i].e, &mctemp);
-		mctemp.a = A(2,2).real();mctemp.b = A(2,2).imag();
-		setmcm(&inputMatrices[i].f, &mctemp);
-	}
 
 	//Get the number of platforms
 	erri = clGetPlatformIDs(0, NULL, &nPlatforms);
@@ -421,7 +447,7 @@ int main(int argc, char* argv[]){
 
 
 	/*
-	 * we have only two kernels, that is why we run over the for loop only for 2 values of i.
+	 * We have only two kernels, that is why we run over the for loop only for 2 values of i.
 	 */
 
 	for(unsigned int j = 0; j < replicates; j++){
@@ -429,7 +455,7 @@ int main(int argc, char* argv[]){
 		for(unsigned int i = 0; i < 2; i++){
 
 			/*
-			 * Specify the kernel to be used. We will start by using the kernel based on Cholesky factorization.
+			 * Specify the kernel to be used.
 			 */
 
 			kernel = clCreateKernel(program, kernel_strings[i].c_str(), &erri);
@@ -556,18 +582,12 @@ int main(int argc, char* argv[]){
 				std::cout << "Error! The kernel was not queued successfully." << std::endl;
 				exit(1);
 			}
-//			else {
-//				std::cout << "The kernel was queued successfully." << std::endl;
-//			}
 
 			erri = clFinish(command_queue);
 			if(erri != CL_SUCCESS){
 				std::cout << "Error! The clFinish function was not successful." << std::endl;
 				exit(1);
 			}
-//			else {
-//				std::cout << "The clFinish function was successful." << std::endl;
-//			}
 
 			//End counting time
 			clock_gettime(CLOCK_MONOTONIC, &time_end);
@@ -578,6 +598,7 @@ int main(int argc, char* argv[]){
 				times_fast[j] = get_millisecs(diff_time(time_init, time_end));
 				ftimes_fast << times_fast[j] << ";..." << std::endl;
 			}
+
 			/*
 			 * Reading the output buffer.
 			 */
@@ -600,7 +621,12 @@ int main(int argc, char* argv[]){
 			 * Reading the output buffer.
 			 */
 
-			erri = clEnqueueReadBuffer(command_queue, outputDetsBuffer, CL_TRUE, 0, sizeof(mcomplex)*nMatrices, outputDetsLU, 0, NULL, NULL);
+			if( i == 0){
+				erri = clEnqueueReadBuffer(command_queue, outputDetsBuffer, CL_TRUE, 0, sizeof(mcomplex)*nMatrices, outputDetsLU, 0, NULL, NULL);
+			} else {
+				erri = clEnqueueReadBuffer(command_queue, outputDetsBuffer, CL_TRUE, 0, sizeof(mcomplex)*nMatrices, outputDetsFast, 0, NULL, NULL);
+			}
+
 
 			if(erri != CL_SUCCESS){
 				std::cout << "Error! The reading of data from the buffer was not successful." << std::endl;
@@ -611,7 +637,7 @@ int main(int argc, char* argv[]){
 		}
 
 		for(unsigned int k = 0; k< nMatrices; k++) {
-			double tdnorm = dnorm(outputMatricesFast[k], outputMatricesLU[k]);
+			double tdnorm = mcmatrix_norm(outputMatricesFast[k], outputMatricesLU[k]);
 			double thresholdv = 1e-6;
 			if(tdnorm >= thresholdv){
 				std::cout << "The matrices in k = " << k << " in replicate j = " << j <<
@@ -644,6 +670,40 @@ int main(int argc, char* argv[]){
 	ftimes_lu.close();
 	ftimes_fast.close();
 
+	unsigned int zz = 25;
+
+	std::cout << "The "<<zz<<"th input matrix is:" << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].a = " << inputMatrices[zz].a.a <<"+j" << inputMatrices[zz].a.b << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].b = " << inputMatrices[zz].b.a <<"+j" << inputMatrices[zz].b.b << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].c = " << inputMatrices[zz].c.a <<"+j" << inputMatrices[zz].c.b << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].d = " << inputMatrices[zz].d.a <<"+j" << inputMatrices[zz].d.b << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].e = " << inputMatrices[zz].e.a <<"+j" << inputMatrices[zz].e.b << std::endl;
+	std::cout << "inputMatrices[" << zz <<"].f = " << inputMatrices[zz].f.a <<"+j" << inputMatrices[zz].f.b << std::endl;
+
+
+	std::cout << "The "<<zz<<"th inverted matrices and determinants are:" << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].a = " << outputMatricesLU[zz].a.a <<"+j" << outputMatricesLU[zz].a.b << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].b = " << outputMatricesLU[zz].b.a <<"+j" << outputMatricesLU[zz].b.b << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].c = " << outputMatricesLU[zz].c.a <<"+j" << outputMatricesLU[zz].c.b << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].d = " << outputMatricesLU[zz].d.a <<"+j" << outputMatricesLU[zz].d.b << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].e = " << outputMatricesLU[zz].e.a <<"+j" << outputMatricesLU[zz].e.b << std::endl;
+	std::cout << "outputMatricesLU[" << zz <<"].f = " << outputMatricesLU[zz].f.a <<"+j" << outputMatricesLU[zz].f.b << std::endl;
+	std::cout << "outputDetsLU[" << zz <<"].a = " << outputDetsLU[zz].a<<"+j"<< outputDetsLU[zz].b << std::endl;
+
+	std::cout << "outputMatricesFast[" << zz <<"].a = " << outputMatricesFast[zz].a.a <<"+j" << outputMatricesFast[zz].a.b << std::endl;
+	std::cout << "outputMatricesFast[" << zz <<"].b = " << outputMatricesFast[zz].b.a <<"+j" << outputMatricesFast[zz].b.b << std::endl;
+	std::cout << "outputMatricesFast[" << zz <<"].c = " << outputMatricesFast[zz].c.a <<"+j" << outputMatricesFast[zz].c.b << std::endl;
+	std::cout << "outputMatricesFast[" << zz <<"].d = " << outputMatricesFast[zz].d.a <<"+j" << outputMatricesFast[zz].d.b << std::endl;
+	std::cout << "outputMatricesFast[" << zz <<"].e = " << outputMatricesFast[zz].e.a <<"+j" << outputMatricesFast[zz].e.b << std::endl;
+	std::cout << "outputMatricesFast[" << zz <<"].f = " << outputMatricesFast[zz].f.a <<"+j" << outputMatricesFast[zz].f.b << std::endl;
+	std::cout << "outputDetsFast[" << zz <<"].a = " << outputDetsFast[zz].a <<"+j"<< outputDetsFast[zz].b << std::endl;
+
+	if(SYNTHETIC){
+		std::cout << "The simulation was performed with synthetic data." << std::endl;
+	} else {
+		std::cout << "The simulation was performed with real data." << std::endl;
+	}
+
 	//Cleaning up
 	clReleaseMemObject(inputMatricesBuffer);
 	clReleaseMemObject(outputMatricesBuffer);
@@ -651,6 +711,13 @@ int main(int argc, char* argv[]){
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(command_queue);
 	clReleaseContext(context);
+
+	delete inputMatrices;
+	delete outputMatricesLU;
+	delete outputMatricesFast;
+	delete outputDetsLU;
+	delete outputDetsFast;
+
 
 	return 0;
 }

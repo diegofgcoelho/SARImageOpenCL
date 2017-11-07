@@ -4,7 +4,7 @@
  *  Created on: Sep 28, 2017
  *      Author: Diego Coelho, PhD Candidate, University of Calgary
  *  Description:
- *  	This file implements some useful functions described in numeric_t.h.
+ *  	This file implements some useful functions described in numeric_s.h.
  *
  */
 
@@ -64,7 +64,7 @@ double norm(mcmatrix a){
 	return sqrt(t);
 }
 
-double dnorm(mcmatrix a, mcmatrix b){
+double mcmatrix_norm(mcmatrix a, mcmatrix b){
 	/*
 	 * This function returns the Frobenius norm of the difference between mcmatrix objects,
 	 * which represent an Hermitian matrices.

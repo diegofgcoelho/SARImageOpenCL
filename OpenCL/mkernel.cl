@@ -174,15 +174,17 @@ __kernel void inv_det_fast(__global mcmatrix * in, __global mcmatrix * out, __gl
 	size_t id = get_global_id(0);
 	
 	mcomplex A = multmc(in[id].d, in[id].f);
-	A.a = A.a-pow(magmc(in[id].e), 2);
+	A.a = A.a-pow(magmc(in[id].e), 2); A.b = 0.0;
 	mcomplex B = mulmcc(submc(multmc(conjmc(in[id].b), in[id].f), multmc(in[id].e, conjmc(in[id].c))), -1.0);
 	mcomplex C = submc(multmc(conjmc(in[id].b), conjmc(in[id].e)), multmc(in[id].d, conjmc(in[id].c)));
-	mcomplex D = multmc(in[id].a, in[id].f); D.a = D.a - pow(magmc(in[id].c), 2);
+	mcomplex D = multmc(in[id].a, in[id].f); D.a = D.a - pow(magmc(in[id].c), 2); D.b = 0.0;
 	mcomplex E = mulmcc(submc(multmc(in[id].a, conjmc(in[id].e)), multmc(in[id].b, conjmc(in[id].c))), -1.0);
-	mcomplex F = multmc(in[id].a, in[id].d); F.a = F.a - pow(magmc(in[id].b), 2);
+	mcomplex F = multmc(in[id].a, in[id].d); F.a = F.a - pow(magmc(in[id].b), 2); F.b = 0.0;
 
 	//Determinant of input matrix
 	det[id] = addmc(multmc(in[id].a, A), addmc(multmc(in[id].b, B), multmc(in[id].c, C)));
+	//det[id].a = in[id].a.a*in[id].d.a*in[id].f.a-in[id].a.a*pow(magmc(in[id].e),2)-in[id].f.a*pow(magmc(in[id].b),2)-in[id].d.a*pow(magmc(in[id].c),2)+2*multmc(multmc(in[id].b, in[id].e), conjmc(in[id].c)).a;
+	det[id].b = 0.0;
 
 	mcomplex invD = invmc(det[id]);
 

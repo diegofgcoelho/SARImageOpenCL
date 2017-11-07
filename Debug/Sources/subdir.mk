@@ -23,8 +23,8 @@ CPP_DEPS += \
 Sources/%.o: ../Sources/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: NVCC Compiler'
-	/usr/local/cuda-8.0/bin/nvcc -G -g -O0 -std=c++11   -odir "Sources" -M -o "$(@:%.o=%.d)" "$<"
-	/usr/local/cuda-8.0/bin/nvcc -G -g -O0 -std=c++11 --compile  -x c++ -o  "$@" "$<"
+	/usr/local/cuda-8.0/bin/nvcc -I/usr/share/R/include -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2 -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2/Rcpp/include -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2/RInside/include -G -g -O0 -std=c++11   -odir "Sources" -M -o "$(@:%.o=%.d)" "$<"
+	/usr/local/cuda-8.0/bin/nvcc -I/usr/share/R/include -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2 -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2/Rcpp/include -I/home/diego/R/x86_64-pc-linux-gnu-library/3.2/RInside/include -G -g -O0 -std=c++11 --compile  -x c++ -o  "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

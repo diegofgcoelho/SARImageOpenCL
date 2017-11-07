@@ -59,7 +59,7 @@ all: SARImageOpenCL
 SARImageOpenCL: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: NVCC Linker'
-	/usr/local/cuda-8.0/bin/nvcc --cudart static --relocatable-device-code=false -link -o  "SARImageOpenCL" $(OBJS) $(USER_OBJS) $(LIBS)
+	/usr/local/cuda-8.0/bin/nvcc --cudart static -L/home/diego/R/x86_64-pc-linux-gnu-library/3.2/RInside/lib --relocatable-device-code=false -link -o  "SARImageOpenCL" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
