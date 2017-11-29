@@ -55,8 +55,9 @@ int main(int argc, char* argv[]){
 		/*
 		 * Creating synthetic data to be used for simulation and setting the number of matrices
 		 */
+		//CL_DEVICE_MAX_MEM_ALLOC returned 525058048 (read in a different application).
+		nMatrices = (525058048/sizeof(mcmatrix));//450*600;
 
-		nMatrices = 450*600;
 
 		//Allocating space for the inputMatrices array
 		inputMatrices = new mcmatrix[nMatrices];
@@ -638,7 +639,7 @@ int main(int argc, char* argv[]){
 
 		for(unsigned int k = 0; k< nMatrices; k++) {
 			double tdnorm = mcmatrix_norm(outputMatricesFast[k], outputMatricesLU[k]);
-			double thresholdv = 1e-6;
+			double thresholdv = 1e-4;
 			if(tdnorm >= thresholdv){
 				std::cout << "The matrices in k = " << k << " in replicate j = " << j <<
 						" show a norm of " << tdnorm << ", higher than the threshold of " << thresholdv << std::endl;
