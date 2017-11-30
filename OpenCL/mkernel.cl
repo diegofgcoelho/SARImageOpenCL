@@ -8,7 +8,6 @@
  *  	this project.
  *
  *  	Because OpenCL is follows C99, everything in this file follows this standard.
- *		vim: syntax=C
  */
 
 #include "numerical_t.h"
