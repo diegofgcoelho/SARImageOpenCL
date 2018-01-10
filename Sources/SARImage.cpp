@@ -26,8 +26,9 @@
 #include "../../home/diego/softwares/eigen3.3/Eigen/Dense"
 
 /*
- * Dear reviewer, if you want compile the code in your machine, please, edit the data file location depending on where
- * you put it in your computer. The String object storing the data file location is the Rfilename in the main function.
+ * Dear reviewer, if you want compile the code in your machine (besides having all the OpenCL libraries set up in your computer),
+ * please, edit the data file location depending on where you put it in your computer. The String object storing the data file
+ * location is the Rfilename in the main function.
  */
 
 //This determines the number of replicates
