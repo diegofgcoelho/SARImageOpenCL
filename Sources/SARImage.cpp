@@ -25,6 +25,11 @@
 #include "../Test/test_algs.h"
 #include "../../home/diego/softwares/eigen3.3/Eigen/Dense"
 
+/*
+ * Dear reviewer, if you want compile the code in your machine, please, edit the data file location depending on where
+ * you put it in your computer. The String object storing the data file location is the Rfilename in the main function.
+ */
+
 //This determines the number of replicates
 const long unsigned int replicates = 1000;
 
@@ -45,7 +50,7 @@ int main(int argc, char* argv[]){
 
 	if(!SYNTHETIC){
 		/*
-		 * Reading real data from R file
+		 * Reading real data from R file. TO REVIEWER: Edit here to insert the location od the data file in your computer.
 		 */
 		std::string Rfilename = "/home/diego/isync/dfgc1/Coelho-Cintra-Frery-Dimitrov/data/SanFranciscoImage.rdata";
 		read_r_data(Rfilename, &inputMatrices, &nMatrices);
